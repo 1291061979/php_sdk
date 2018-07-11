@@ -119,6 +119,48 @@ class YouTu
         return $ret;
     }
 
+    /**
+     * 检测base64图片
+     * 
+     * @param  string  $base64     base64图片
+     * @param  boolean $isbigface  是否大脸
+     * @return array           
+     */
+    public static function detectfacebase64($base64,$isbigface)
+    {
+        $expired = time() + self::EXPIRED_SECONDS;
+        $postUrl = Conf::$END_POINT . 'youtu/api/detectface';
+        $sign = Auth::appSign($expired, Conf::$USER_ID);
+
+        $image_data = file_get_contents($real_image_path);
+        $post_data = array(
+            'app_id' =>  Conf::$APPID,
+            'image' => $base64,
+            'mode' => $isbigface
+        );
+
+        $req = array(
+            'url' => $postUrl,
+            'method' => 'post',
+            'timeout' => 10,
+            'data' => json_encode($post_data),
+            'header' => array(
+                'Authorization:'.$sign,
+                'Content-Type:text/json',
+                'Expect: ',
+            ),
+        );
+        $rsp  = Http::send($req);
+
+         $ret  = json_decode($rsp, true);
+
+        if(!$ret){
+            return self::getStatusText();
+        }
+
+        return $ret;
+    }
+
      /**
      * @brief detectfaceurl
      * @param url 图片url
